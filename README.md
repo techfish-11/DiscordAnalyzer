@@ -1,4 +1,4 @@
-# DiscordAnalyzer
+# EvexDevelopers SupportBot
 Discordサーバーを分析するBot。EvexDevelopers向けに開発
 
 # 使用方法
