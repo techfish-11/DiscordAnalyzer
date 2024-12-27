@@ -1,0 +1,2 @@
+# DiscordAnalyzer
+Discordサーバーを分析するBot。EvexDevelopers向けに開発
