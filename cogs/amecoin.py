@@ -149,9 +149,34 @@ class AmexCoin(commands.Cog):
 
             await interaction.response.send_message(f"{user.mention} に {amount} AmexCoinを送金しました！")
 
+
         except Exception as e:
             print(f"[ERROR in pay]: {e}")
             await interaction.response.send_message("送金処理中にエラーが発生しました。")
+    
+    @app_commands.command(name='admincoin', description='管理者専用コマンド。全員に500AmexCoinを配布します。')
+    async def admin_coin(self, interaction: discord.Interaction, command: str):
+        admin_user_id = 1241397634095120438
+        if interaction.user.id != admin_user_id:
+            await interaction.response.send_message("このコマンドを実行する権限がありません。")
+            return
+
+        if command != 'all500':
+            await interaction.response.send_message("無効なコマンドです。")
+            return
+
+        conn = sqlite3.connect('coin.db')
+        cursor = conn.cursor()
+
+        cursor.execute('SELECT user_id, balance FROM users')
+        users = cursor.fetchall()
+
+        for user_id, balance in users:
+            new_balance = balance + 500
+            cursor.execute('UPDATE users SET balance = ? WHERE user_id = ?', (new_balance, user_id))
+
+        conn.commit()
+        await interaction.response.send_message("全員に500AmexCoinを配布しました！")
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(AmexCoin(bot))
