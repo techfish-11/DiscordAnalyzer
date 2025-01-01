@@ -69,16 +69,14 @@ class DailyMVPAnnouncement(commands.Cog):
     async def before_daily_mvp(self):
         await self.bot.wait_until_ready()
 
-
 class DailyMVPAnnouncement(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.daily_mvp_announcement.is_running()  # タスクがすでに実行中か確認
 
-
     async def cog_load(self):
-        self.reset_daily_points.start()
-
+        if not self.daily_mvp_announcement.is_running():
+            self.daily_mvp_announcement.start()
     def cog_unload(self):
         self.reset_daily_points.cancel()
 
