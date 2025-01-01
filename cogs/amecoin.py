@@ -103,7 +103,7 @@ class AmexCoin(commands.Cog):
     
     @app_commands.command(name='admincoin', description='管理者専用コマンド。全員に500AmexCoinを配布します。')
     async def admin_coin(self, interaction: discord.Interaction, command: str):
-        admin_user_id = 1283023428730748940
+        admin_user_id = 1241397634095120438
         if interaction.user.id != admin_user_id:
             await interaction.response.send_message("このコマンドを実行する権限がありません。")
             return
