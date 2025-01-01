@@ -70,9 +70,11 @@ class DailyMVPAnnouncement(commands.Cog):
         await self.bot.wait_until_ready()
 
 
-class DailyMVPManager(commands.Cog):
+class DailyMVPAnnouncement(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.daily_mvp_announcement.is_running()  # タスクがすでに実行中か確認
+
 
     async def cog_load(self):
         self.reset_daily_points.start()
