@@ -20,7 +20,6 @@ class GrowthCog(commands.Cog):
 
     @discord.app_commands.command(name='growth', description='サーバーの成長推移を可視化し、予測グラフを表示します。')
     async def growth_command(self, ctx: discord.Interaction):
-        await discord.Interaction.response.defer()
         """サーバーの成長推移を可視化し、予測グラフを表示。"""
         result = calculate_growth_rate()
         if result is None:
