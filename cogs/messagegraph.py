@@ -6,13 +6,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import io
 from datetime import datetime, timedelta
+import sys
+sys.path.insert(0, '/root/EvexDevelopers-SupportBot')
+
 
 class MessageGraphCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='messagegraph')
-    async def message_graph(self, ctx):
+    @discord.app_commands.command(name='messagegraph', description='日別メッセージ数の可視化 + 明日分の予測を描画します。')
+    async def message_graph(self, ctx: discord.Interaction) -> None:
         """日別メッセージ数の可視化 + 明日分の予測を描画。"""
         conn = get_db_connection()
         cursor = conn.cursor()

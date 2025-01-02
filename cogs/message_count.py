@@ -2,6 +2,9 @@
 import re
 from discord.ext import commands
 from database import record_message_count, get_db_connection
+import sys
+sys.path.insert(0, '/root/EvexDevelopers-SupportBot')
+
 
 class MessageCountCog(commands.Cog):
     def __init__(self, bot):
@@ -12,6 +15,8 @@ class MessageCountCog(commands.Cog):
         """メッセージを受け取ったときにDBへ記録。"""
         if message.author.bot:
             return
+
+        print(f"Message from {message.author}: {message.content}")
         
         date_str = message.created_at.strftime('%Y-%m-%d')
         record_message_count(date_str)

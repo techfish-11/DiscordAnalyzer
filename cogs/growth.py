@@ -7,82 +7,65 @@ from scipy import stats
 from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
 import io
+import sys
+sys.path.insert(0, '/root/EvexDevelopers-SupportBot')
 
 from database import calculate_growth_rate, get_db_connection
 from config import TARGET_MEMBER_COUNT
+from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 class GrowthCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='growth')
-    async def growth_command(self, ctx):
+    @discord.app_commands.command(name='growth', description='サーバーの成長推移を可視化し、予測グラフを表示します。')
+    async def growth_command(self, ctx: discord.Interaction):
+        await discord.Interaction.response.defer()
         """サーバーの成長推移を可視化し、予測グラフを表示。"""
         result = calculate_growth_rate()
         if result is None:
-            await ctx.send("メンバーの増加率を計算するのに十分なデータがありません。")
+            await ctx.response.send_message("メンバーの増加率を計算するのに十分なデータがありません。")
             return
 
-        growth_rate, total_members, total_days = result
+        total_members = result[1]
         
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('SELECT join_date FROM members ORDER BY join_date')
         join_dates = cursor.fetchall()
 
-        # データの準備
-        dates = [datetime.strptime(row['join_date'], '%Y-%m-%d %H:%M:%S') for row in join_dates]
+        dates = [datetime.strptime(row[0], '%Y-%m-%d %H:%M:%S') for row in join_dates]
         counts = list(range(1, len(dates) + 1))
-
-        # Unix timestamp化
         dates_numeric = np.array([d.timestamp() for d in dates])
         counts_array = np.array(counts)
 
-        # 1) 線形回帰
-        slope, intercept, r_value, p_value, std_err = stats.linregress(dates_numeric, counts_array)
-        linear_pred = slope * dates_numeric + intercept
-
-        # 2) 多項式回帰 (3次)
+        # Polynomial fit (3rd)
         poly_coefs = np.polyfit(dates_numeric, counts_array, 3)
         poly = np.poly1d(poly_coefs)
         poly_pred = poly(dates_numeric)
-
-        linear_r2 = r2_score(counts_array, linear_pred)
         poly_r2 = r2_score(counts_array, poly_pred)
-        better_model = 'polynomial' if poly_r2 > linear_r2 else 'linear'
 
-        # 30日先まで予測
+        # Predict over next 30 days
         future_days = np.linspace(dates_numeric[-1], dates_numeric[-1] + 30*24*3600, 100)
-        if better_model == 'polynomial':
-            future_growth = poly(future_days)
-            target_idx = np.where(future_growth >= TARGET_MEMBER_COUNT)[0]
-        else:
-            future_growth = slope * future_days + intercept
-            target_idx = np.where(future_growth >= TARGET_MEMBER_COUNT)[0]
+        future_growth = poly(future_days)
+        confidence_level = poly_r2
 
+        target_idx = np.where(future_growth >= TARGET_MEMBER_COUNT)[0]
         if len(target_idx) > 0:
-            target_timestamp = future_days[target_idx[0]]
-            future_date_estimate = datetime.fromtimestamp(target_timestamp)
+            future_date_estimate = datetime.fromtimestamp(future_days[target_idx[0]])
         else:
             future_date_estimate = None
 
-        # グラフ描画
+        # Plot
         plt.style.use('dark_background')
         fig, ax = plt.subplots(figsize=(12, 6))
         ax.set_facecolor('#1a1a1a')
         fig.patch.set_facecolor('#1a1a1a')
 
-        # 実データ
         ax.plot(dates, counts, 'o', color='#2ecc71', markersize=4, label='Actual Members')
-
-        # 予測
         future_dates = [datetime.fromtimestamp(ts) for ts in future_days]
-        if better_model == 'polynomial':
-            ax.plot(future_dates, future_growth, '--', color='#9b59b6', 
-                    linewidth=2, label=f'Prediction (R² = {poly_r2:.3f})')
-        else:
-            ax.plot(future_dates, future_growth, '--', color='#9b59b6',
-                    linewidth=2, label=f'Prediction (R² = {linear_r2:.3f})')
+        ax.plot(future_dates, future_growth, '--', color='#9b59b6', linewidth=2,
+                label=f'Prediction (R² = {confidence_level:.3f})')
 
         ax.set_facecolor('#f8f9fa')
         ax.grid(True, linestyle='--', alpha=0.7, color='#dcdde1')
@@ -99,13 +82,11 @@ class GrowthCog(commands.Cog):
         buf.seek(0)
         file = discord.File(buf, filename='growth.png')
         
-        # 過去30日の増加率など算出
+        # Growth stats
         today = datetime.now()
         thirty_days_ago = today - timedelta(days=30)
-        
         cursor.execute('''
-            SELECT COUNT(*) 
-            FROM members 
+            SELECT COUNT(*) FROM members 
             WHERE datetime(join_date) <= datetime(?)
         ''', (thirty_days_ago.strftime('%Y-%m-%d %H:%M:%S'),))
         members_30_days_ago = cursor.fetchone()[0]
@@ -113,14 +94,12 @@ class GrowthCog(commands.Cog):
         recent_members = total_members - members_30_days_ago
         recent_growth_rate = recent_members / 30.0
 
-        confidence_level = poly_r2 if better_model == 'polynomial' else linear_r2
-
         growth_message = (
             f"📊 **詳細成長分析レポート**\n"
             f"現在のメンバー数: **{total_members}**人\n"
             f"過去30日の1日あたり平均増加数: **{recent_growth_rate:.2f}**人\n"
             f"予測モデルの信頼度: **{confidence_level:.1%}**\n"
-            f"使用モデル: **{better_model}**\n"
+            f"使用モデル: **polynomial**\n"
             f"目標達成まであと: **{TARGET_MEMBER_COUNT - total_members}**人\n"
         )
 
@@ -133,7 +112,7 @@ class GrowthCog(commands.Cog):
         else:
             growth_message += "現在の成長率では目標達成日を予測できません。\n"
 
-        await ctx.send(growth_message, file=file)
+        await ctx.response.send_message(growth_message, file=file)
         plt.close()
         buf.close()
 

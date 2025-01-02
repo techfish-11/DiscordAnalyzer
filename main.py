@@ -1,8 +1,8 @@
 # main.py
 import discord
 from discord.ext import commands
-import os
 import asyncio
+import os
 
 # 自作モジュール
 from config import TOKEN, GUILD_ID

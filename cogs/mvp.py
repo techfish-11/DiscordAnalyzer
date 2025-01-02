@@ -3,13 +3,18 @@ import discord
 from discord.ext import commands
 from database import get_db_connection
 from datetime import datetime
+import sys
+sys.path.insert(0, '/root/EvexDevelopers-SupportBot')
+
 
 class MVPCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='mvp')
-    async def show_mvp(self, ctx):
+    @discord.app_commands.command(name='mvp', description='当日の上位5ユーザーを表示します。')
+    async def login_bonus(self, ctx: discord.Interaction) -> None:
+        await discord.Interaction.response.defer()
+        print("MVP command called.")
         """当日の上位5ユーザーを表示。"""
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -26,7 +31,7 @@ class MVPCog(commands.Cog):
         
         rankings = cursor.fetchall()
         if not rankings:
-            await ctx.send("本日のアクティビティはまだありません。")
+            await ctx.response.send_message("本日のアクティビティはまだありません。")
             return
 
         embed = discord.Embed(
@@ -57,7 +62,8 @@ class MVPCog(commands.Cog):
                     inline=False
                 )
 
-        await ctx.send(embed=embed)
+        await ctx.response.send_message(embed=embed)
+        print(f"Displayed MVP rankings for {today}.")
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(MVPCog(bot))
