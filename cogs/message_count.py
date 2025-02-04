@@ -1,8 +1,11 @@
 # cogs/message_count.py
-import re
-from discord.ext import commands
-from database import record_message_count, get_db_connection
 import sys
+import re
+
+from database import record_message_count, get_db_connection
+
+from discord.ext import commands
+
 sys.path.insert(0, "/root/EvexDevelopers-SupportBot")
 
 

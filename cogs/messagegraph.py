@@ -1,12 +1,16 @@
 # cogs/messagegraph.py
-import discord
-from discord.ext import commands
-from database import get_db_connection
+import sys
+from datetime import datetime, timedelta
+
 import numpy as np
 import matplotlib.pyplot as plt
+
 import io
-from datetime import datetime, timedelta
-import sys
+import discord
+from discord.ext import commands
+
+from database import get_db_connection
+
 sys.path.insert(0, "/root/EvexDevelopers-SupportBot")
 
 

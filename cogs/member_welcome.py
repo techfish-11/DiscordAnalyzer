@@ -1,9 +1,12 @@
 # cogs/member_welcome.py
-import discord
-from discord.ext import commands
+import sys
+
 from config import GUILD_ID, CHANNEL_ID, TARGET_MEMBER_COUNT
 from database import record_member_join
-import sys
+
+import discord
+from discord.ext import commands
+
 sys.path.insert(0, "/root/EvexDevelopers-SupportBot")
 
 

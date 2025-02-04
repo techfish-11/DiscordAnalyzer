@@ -1,8 +1,10 @@
-import discord
-from discord.ext import commands
-from discord import app_commands
-import wikipedia
 import re
+
+import wikipedia
+
+import discord
+from discord import app_commands
+from discord.ext import commands
 
 
 class WikipediaCog(commands.Cog):

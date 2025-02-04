@@ -1,9 +1,12 @@
 # cogs/mvp.py
+import sys
+from datetime import datetime
+
+from database import get_db_connection
+
 import discord
 from discord.ext import commands
-from database import get_db_connection
-from datetime import datetime
-import sys
+
 sys.path.insert(0, "/root/EvexDevelopers-SupportBot")
 
 

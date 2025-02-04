@@ -1,14 +1,19 @@
 # cogs/growth.py
-from config import TARGET_MEMBER_COUNT
-from database import calculate_growth_rate, get_db_connection
+import sys
+from datetime import datetime, timedelta
+from io import BytesIO
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import r2_score
+
 import discord
 from discord.ext import commands
-from datetime import datetime, timedelta
-import numpy as np
-from sklearn.metrics import r2_score
-import matplotlib.pyplot as plt
-import io
-import sys
+
+from config import TARGET_MEMBER_COUNT
+from database import calculate_growth_rate, get_db_connection
+
+
 sys.path.insert(0, "/root/EvexDevelopers-SupportBot")
 
 
@@ -75,7 +80,7 @@ class GrowthCog(commands.Cog):
         ax.legend(loc="upper left", frameon=True)
         plt.tight_layout()
 
-        buf = io.BytesIO()
+        buf = BytesIO()
         plt.savefig(buf, format="png", dpi=300, bbox_inches="tight")
         buf.seek(0)
         file = discord.File(buf, filename="growth.png")
