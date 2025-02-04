@@ -15,12 +15,9 @@ class CommandList(commands.Cog):
         # コマンド一覧の取得
         for command in self.bot.tree.get_commands():
             # コマンド名と説明を埋め込む
-            embed.add_field(
-                name=f"/{command.name}", value=command.description if command.description else "説明なし", inline=False)
+            embed.add_field(name=f"/{command.name}", value=command.description if command.description else "説明なし", inline=False)
 
         await interaction.response.send_message(embed=embed)
-
-# Cogのセットアップ
 
 
 async def setup(bot):

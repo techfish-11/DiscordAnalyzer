@@ -11,7 +11,7 @@ class PackageSearch(commands.Cog):
 
     def sanitize_input(self, content: str) -> str:
         """入力からメンションや危険な文字を無効化する"""
-        sanitized = re.sub(r'@', '＠', content)  # すべての@を全角に置き換え
+        sanitized = re.sub(r"@", "＠", content)  # すべての@を全角に置き換え
         return sanitized
 
     @app_commands.command(name="package", description="npmまたはpipのパッケージを検索します")
@@ -42,7 +42,7 @@ class PackageSearch(commands.Cog):
         """npmパッケージを検索 (npm registry APIを使用)"""
         try:
             url = f"https://registry.npmjs.org/{package_name}"
-            response = requests.get(url)
+            response = requests.get(url, timeout=10.0)
             response.raise_for_status()  # HTTPエラーの自動検出
 
             package_info = response.json()
@@ -64,7 +64,7 @@ class PackageSearch(commands.Cog):
         """pipパッケージを検索 (PyPI APIを使用)"""
         try:
             url = f"https://pypi.org/pypi/{package_name}/json"
-            response = requests.get(url)
+            response = requests.get(url, timeout=10.0)
             response.raise_for_status()  # HTTPエラーの自動検出
 
             package_info = response.json()

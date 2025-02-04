@@ -4,30 +4,32 @@ from discord.ext import commands
 from database import get_db_connection
 from datetime import datetime
 import sys
-sys.path.insert(0, '/root/EvexDevelopers-SupportBot')
+sys.path.insert(0, "/root/EvexDevelopers-SupportBot")
 
 
 class MVPCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @discord.app_commands.command(name='mvp', description='当日の上位5ユーザーを表示します。')
+    @discord.app_commands.command(name="mvp", description="当日の上位5ユーザーを表示します。")
     async def login_bonus(self, ctx: discord.Interaction) -> None:
+        """当日の上位5ユーザーを表示。"""
+
         await ctx.response.defer()
         print("MVP command called.")
-        """当日の上位5ユーザーを表示。"""
+
         conn = get_db_connection()
         cursor = conn.cursor()
-        today = datetime.now().strftime('%Y-%m-%d')
+        today = datetime.now().strftime("%Y-%m-%d")
 
-        cursor.execute('''
+        cursor.execute("""
             SELECT user_id, total_points,
                    text_count, link_count, media_count, reply_count
             FROM message_points 
             WHERE date = ? 
             ORDER BY total_points DESC 
             LIMIT 5
-        ''', (today,))
+        """, (today,))
 
         rankings = cursor.fetchall()
         if not rankings:
@@ -42,12 +44,12 @@ class MVPCog(commands.Cog):
 
         medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"]
         for i, row in enumerate(rankings):
-            user_id = row['user_id']
-            total_points = row['total_points']
-            text = row['text_count']
-            link = row['link_count']
-            media = row['media_count']
-            reply = row['reply_count']
+            user_id = row["user_id"]
+            total_points = row["total_points"]
+            text = row["text_count"]
+            link = row["link_count"]
+            media = row["media_count"]
+            reply = row["reply_count"]
 
             user = ctx.guild.get_member(user_id)
             if user:
