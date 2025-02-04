@@ -27,9 +27,9 @@ class MojiBake(commands.Cog):
             # さらにShift_JISで文字化けを追加（エラーを無視して処理）
             content_baked = content_baked.encode("utf-8").decode("shift_jis", errors="ignore")
         except UnicodeDecodeError as e:
-            content_baked = f"文字化け処理中にエラーが発生しました: {str(e)}"
+            content_baked = f"文字化け処理中にエラーが発生しました: {e}"
         except Exception as e:
-            content_baked = f"予期しないエラーが発生しました: {str(e)}"
+            content_baked = f"予期しないエラーが発生しました: {e}"
 
         # メンション無効化設定を追加して返す
         await interaction.response.send_message(content_baked, allowed_mentions=discord.AllowedMentions.none())

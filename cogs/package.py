@@ -36,7 +36,7 @@ class PackageSearch(commands.Cog):
             else:
                 await interaction.response.send_message(f"{manager}パッケージ `{package_name}` の情報は見つかりませんでした。")
         except Exception as e:
-            await interaction.response.send_message(f"エラーが発生しました: {str(e)}")
+            await interaction.response.send_message(f"エラーが発生しました: {e}")
 
     def search_npm_package(self, package_name: str) -> str:
         """npmパッケージを検索 (npm registry APIを使用)"""
@@ -58,7 +58,7 @@ class PackageSearch(commands.Cog):
         except requests.HTTPError as e:
             return f"npmパッケージの取得中にHTTPエラーが発生しました: {e}"
         except Exception as e:
-            return f"npmパッケージの検索中にエラーが発生しました: {str(e)}"
+            return f"npmパッケージの検索中にエラーが発生しました: {e}"
 
     def search_pip_package(self, package_name: str) -> str:
         """pipパッケージを検索 (PyPI APIを使用)"""
@@ -79,7 +79,7 @@ class PackageSearch(commands.Cog):
         except requests.HTTPError as e:
             return f"pipパッケージの取得中にHTTPエラーが発生しました: {e}"
         except Exception as e:
-            return f"pipパッケージの検索中にエラーが発生しました: {str(e)}"
+            return f"pipパッケージの検索中にエラーが発生しました: {e}"
 
 
 async def setup(bot: commands.Bot):
