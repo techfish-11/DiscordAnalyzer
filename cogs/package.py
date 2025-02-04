@@ -1,8 +1,11 @@
-import discord
-from discord.ext import commands
-from discord import app_commands
-import requests
 import re
+
+import requests
+
+import discord
+from discord import app_commands
+from discord.ext import commands
+
 
 class PackageSearch(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -10,7 +13,7 @@ class PackageSearch(commands.Cog):
 
     def sanitize_input(self, content: str) -> str:
         """入力からメンションや危険な文字を無効化する"""
-        sanitized = re.sub(r'@', '＠', content)  # すべての@を全角に置き換え
+        sanitized = re.sub(r"@", "＠", content)  # すべての@を全角に置き換え
         return sanitized
 
     @app_commands.command(name="package", description="npmまたはpipのパッケージを検索します")
@@ -24,6 +27,7 @@ class PackageSearch(commands.Cog):
             return
 
         try:
+            result = ""
             if manager == "npm":
                 result = self.search_npm_package(package_name)
             elif manager == "pip":
@@ -34,20 +38,21 @@ class PackageSearch(commands.Cog):
             else:
                 await interaction.response.send_message(f"{manager}パッケージ `{package_name}` の情報は見つかりませんでした。")
         except Exception as e:
-            await interaction.response.send_message(f"エラーが発生しました: {str(e)}")
+            await interaction.response.send_message(f"エラーが発生しました: {e}")
 
     def search_npm_package(self, package_name: str) -> str:
         """npmパッケージを検索 (npm registry APIを使用)"""
         try:
             url = f"https://registry.npmjs.org/{package_name}"
-            response = requests.get(url)
+            response = requests.get(url, timeout=10.0)
             response.raise_for_status()  # HTTPエラーの自動検出
 
             package_info = response.json()
-            latest_version = package_info.get("dist-tags", {}).get("latest", "不明")
+            latest_version = package_info.get(
+                "dist-tags", {}).get("latest", "不明")
             description = package_info.get("description", "説明なし")
             homepage = package_info.get("homepage", "情報なし")
-            
+
             return (f"**{package_name}**\n"
                     f"バージョン: {latest_version}\n"
                     f"説明: {description}\n"
@@ -55,13 +60,13 @@ class PackageSearch(commands.Cog):
         except requests.HTTPError as e:
             return f"npmパッケージの取得中にHTTPエラーが発生しました: {e}"
         except Exception as e:
-            return f"npmパッケージの検索中にエラーが発生しました: {str(e)}"
+            return f"npmパッケージの検索中にエラーが発生しました: {e}"
 
     def search_pip_package(self, package_name: str) -> str:
         """pipパッケージを検索 (PyPI APIを使用)"""
         try:
             url = f"https://pypi.org/pypi/{package_name}/json"
-            response = requests.get(url)
+            response = requests.get(url, timeout=10.0)
             response.raise_for_status()  # HTTPエラーの自動検出
 
             package_info = response.json()
@@ -76,7 +81,8 @@ class PackageSearch(commands.Cog):
         except requests.HTTPError as e:
             return f"pipパッケージの取得中にHTTPエラーが発生しました: {e}"
         except Exception as e:
-            return f"pipパッケージの検索中にエラーが発生しました: {str(e)}"
+            return f"pipパッケージの検索中にエラーが発生しました: {e}"
+
 
 async def setup(bot: commands.Bot):
     """Cogを非同期で追加"""

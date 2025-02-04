@@ -1,9 +1,9 @@
 # database.py
-import sqlite3
 import os
+import sqlite3
 from datetime import datetime
 
-DB_FILE = 'members.db'
+DB_FILE = "members.db"
 
 
 def get_db_connection():
@@ -22,23 +22,23 @@ def init_db():
     with conn:
         if need_init:
             # membersテーブル
-            conn.execute('''
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS members (
                     member_id INTEGER PRIMARY KEY,
                     join_date TEXT
                 )
-            ''')
+            """)
 
             # 日毎メッセージ数
-            conn.execute('''
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS message_count (
                     date TEXT PRIMARY KEY,
                     count INTEGER
                 )
-            ''')
+            """)
 
             # 詳細メッセージポイント
-            conn.execute('''
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS message_points (
                     user_id INTEGER,
                     date TEXT,
@@ -49,29 +49,29 @@ def init_db():
                     total_points INTEGER DEFAULT 0,
                     PRIMARY KEY (user_id, date)
                 )
-            ''')
+            """)
 
             # アーカイブ用(オプション)
-            conn.execute('''
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS message_points_archive
                 AS SELECT * FROM message_points WHERE 0
-            ''')
+            """)
 
 
 def record_member_join(member_id: int, join_date: str):
     """メンバー参加データをDBに記録（既存なら無視）。"""
     conn = get_db_connection()
     with conn:
-        conn.execute('''
+        conn.execute("""
             INSERT OR IGNORE INTO members (member_id, join_date) 
             VALUES (?, ?)
-        ''', (member_id, join_date))
+        """, (member_id, join_date))
 
 
 def record_existing_members(guild):
     """ギルド内メンバーを一括記録（Bot起動時に呼び出し）。"""
     for member in guild.members:
-        join_date = member.joined_at.strftime('%Y-%m-%d %H:%M:%S')
+        join_date = member.joined_at.strftime("%Y-%m-%d %H:%M:%S")
         record_member_join(member.id, join_date)
 
 
@@ -79,12 +79,12 @@ def record_message_count(date: str):
     """日ごとのメッセージ総数をカウントアップ。"""
     conn = get_db_connection()
     with conn:
-        conn.execute('''
+        conn.execute("""
             INSERT INTO message_count (date, count) 
             VALUES (?, 1)
             ON CONFLICT(date) 
             DO UPDATE SET count = count + 1
-        ''', (date,))
+        """, (date,))
 
 
 def calculate_growth_rate():
@@ -95,24 +95,20 @@ def calculate_growth_rate():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute(
-        'SELECT member_id, join_date FROM members ORDER BY join_date')
+    cursor.execute("SELECT member_id, join_date FROM members ORDER BY join_date")
     members = cursor.fetchall()
 
     if len(members) < 2:
         return None
 
-    first_join_date = datetime.strptime(
-        members[0]['join_date'], '%Y-%m-%d %H:%M:%S')
-    last_join_date = datetime.strptime(
-        members[-1]['join_date'], '%Y-%m-%d %H:%M:%S')
+    first_join_date = datetime.strptime(members[0]["join_date"], "%Y-%m-%d %H:%M:%S")
+    last_join_date = datetime.strptime(members[-1]["join_date"], "%Y-%m-%d %H:%M:%S")
 
     total_members = len(members)
     total_days = (last_join_date - first_join_date).days
 
+    growth_rate = 0
     if total_days > 0:
         growth_rate = (total_members - 1) / total_days
-    else:
-        growth_rate = 0
 
     return growth_rate, total_members, total_days

@@ -1,8 +1,11 @@
-import discord
-from discord.ext import commands
-from discord import app_commands
-import wikipedia
 import re
+
+import wikipedia
+
+import discord
+from discord import app_commands
+from discord.ext import commands
+
 
 class WikipediaCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -12,8 +15,8 @@ class WikipediaCog(commands.Cog):
     def sanitize_input(self, content: str) -> str:
         """メンションなどの無効化"""
         # メンションの無効化: @ → 全角＠に変換、@everyone, @hereを無効化
-        sanitized = re.sub(r'@', '＠', content)  
-        sanitized = re.sub(r'@(everyone|here)', '＠\\1', sanitized)  # @everyone, @hereを無効化
+        sanitized = re.sub(r"@", "＠", content)
+        sanitized = re.sub(r"@(everyone|here)", "＠\\1", sanitized)  # @everyone, @hereを無効化
         return sanitized
 
     @app_commands.command(name="wikipedia", description="Wikipediaで検索します")
@@ -59,6 +62,7 @@ class WikipediaCog(commands.Cog):
             await interaction.followup.send(f"**'{query}'** に該当するページが見つかりませんでした。")
         except Exception:
             await interaction.followup.send("エラーが発生しました")
+
 
 async def setup(bot: commands.Bot):
     """Cogを非同期で追加するためのセットアップ関数"""

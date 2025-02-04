@@ -1,22 +1,27 @@
 # cogs/growth.py
+import sys
+from datetime import datetime, timedelta
+from io import BytesIO
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import r2_score
+
 import discord
 from discord.ext import commands
-from datetime import datetime, timedelta
-import numpy as np
-from sklearn.metrics import r2_score
-import matplotlib.pyplot as plt
-import io
-import sys
-sys.path.insert(0, '/root/EvexDevelopers-SupportBot')
 
-from database import calculate_growth_rate, get_db_connection
 from config import TARGET_MEMBER_COUNT
+from database import calculate_growth_rate, get_db_connection
+
+
+sys.path.insert(0, "/root/EvexDevelopers-SupportBot")
+
 
 class GrowthCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @discord.app_commands.command(name='growth', description='サーバーの成長推移を可視化し、予測グラフを表示します。')
+    @discord.app_commands.command(name="growth", description="サーバーの成長推移を可視化し、予測グラフを表示します。")
     async def growth_command(self, ctx: discord.Interaction):
         """サーバーの成長推移を可視化し、予測グラフを表示。"""
         result = calculate_growth_rate()
@@ -25,13 +30,13 @@ class GrowthCog(commands.Cog):
             return
 
         total_members = result[1]
-        
+
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT join_date FROM members ORDER BY join_date')
+        cursor.execute("SELECT join_date FROM members ORDER BY join_date")
         join_dates = cursor.fetchall()
 
-        dates = [datetime.strptime(row[0], '%Y-%m-%d %H:%M:%S') for row in join_dates]
+        dates = [datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S") for row in join_dates]
         counts = list(range(1, len(dates) + 1))
         dates_numeric = np.array([d.timestamp() for d in dates])
         counts_array = np.array(counts)
@@ -54,38 +59,39 @@ class GrowthCog(commands.Cog):
             future_date_estimate = None
 
         # Plot
-        plt.style.use('dark_background')
+        plt.style.use("dark_background")
         fig, ax = plt.subplots(figsize=(12, 6))
-        ax.set_facecolor('#1a1a1a')
-        fig.patch.set_facecolor('#1a1a1a')
+        ax.set_facecolor("#1a1a1a")
+        fig.patch.set_facecolor("#1a1a1a")
 
-        ax.plot(dates, counts, 'o', color='#2ecc71', markersize=4, label='Actual Members')
+        ax.plot(dates, counts, "o", color="#2ecc71",
+                markersize=4, label="Actual Members")
         future_dates = [datetime.fromtimestamp(ts) for ts in future_days]
-        ax.plot(future_dates, future_growth, '--', color='#9b59b6', linewidth=2,
-                label=f'Prediction (R² = {confidence_level:.3f})')
+        ax.plot(future_dates, future_growth, "--", color="#9b59b6", linewidth=2,
+                label=f"Prediction (R² = {confidence_level:.3f})")
 
-        ax.set_facecolor('#f8f9fa')
-        ax.grid(True, linestyle='--', alpha=0.7, color='#dcdde1')
-        ax.set_xlabel('Date', fontsize=12, fontweight='bold')
-        ax.set_ylabel('Member Count', fontsize=12, fontweight='bold')
-        ax.set_title('Server Growth Projection', fontsize=14, fontweight='bold', pad=20)
-        ax.axhline(y=TARGET_MEMBER_COUNT, color='#e74c3c', linestyle='--', label=f'Target: {TARGET_MEMBER_COUNT}')
-        plt.xticks(rotation=30, ha='right')
-        ax.legend(loc='upper left', frameon=True)
+        ax.set_facecolor("#f8f9fa")
+        ax.grid(True, linestyle="--", alpha=0.7, color="#dcdde1")
+        ax.set_xlabel("Date", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Member Count", fontsize=12, fontweight="bold")
+        ax.set_title("Server Growth Projection", fontsize=14, fontweight="bold", pad=20)
+        ax.axhline(y=TARGET_MEMBER_COUNT, color="#e74c3c", linestyle="--", label=f"Target: {TARGET_MEMBER_COUNT}")
+        plt.xticks(rotation=30, ha="right")
+        ax.legend(loc="upper left", frameon=True)
         plt.tight_layout()
 
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png', dpi=300, bbox_inches='tight')
+        buf = BytesIO()
+        plt.savefig(buf, format="png", dpi=300, bbox_inches="tight")
         buf.seek(0)
-        file = discord.File(buf, filename='growth.png')
+        file = discord.File(buf, filename="growth.png")
 
         # Growth stats
         today = datetime.now()
         thirty_days_ago = today - timedelta(days=30)
-        cursor.execute('''
+        cursor.execute("""
             SELECT COUNT(*) FROM members 
             WHERE datetime(join_date) <= datetime(?)
-        ''', (thirty_days_ago.strftime('%Y-%m-%d %H:%M:%S'),))
+        """, (thirty_days_ago.strftime("%Y-%m-%d %H:%M:%S"),))
         members_30_days_ago = cursor.fetchone()[0]
 
         recent_members = total_members - members_30_days_ago
@@ -112,6 +118,7 @@ class GrowthCog(commands.Cog):
         await ctx.response.send_message(growth_message, file=file)
         plt.close()
         buf.close()
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(GrowthCog(bot))

@@ -1,12 +1,14 @@
+import random
+
 import discord
 from discord.ext import commands
-import random
+
 
 class Kuji(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @discord.app_commands.command(name='kuji', description='HTTPステータスコードでおみくじを引きます。')
+    @discord.app_commands.command(name="kuji", description="HTTPステータスコードでおみくじを引きます。")
     async def kuji(self, interaction: discord.Interaction) -> None:
         status_codes = {
             100: "100: 継続中 - 小吉\n次のプロジェクトに集中すると吉！",
@@ -65,6 +67,7 @@ class Kuji(commands.Cog):
         code = random.choice(list(status_codes.keys()))
         embed = discord.Embed(title="HTTP Status Kuji", description=status_codes[code], color=discord.Color.blue())
         await interaction.response.send_message(embed=embed)
+
 
 async def setup(bot):
     await bot.add_cog(Kuji(bot))
