@@ -25,6 +25,7 @@ class PackageSearch(commands.Cog):
             return
 
         try:
+            result = ""
             if manager == "npm":
                 result = self.search_npm_package(package_name)
             elif manager == "pip":
