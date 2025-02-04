@@ -16,7 +16,7 @@ class DailyMVPCog(commands.Cog):
         conn = get_db_connection()
         cursor = conn.cursor()
         yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-        
+
         cursor.execute('DELETE FROM message_points WHERE date = ?', (yesterday,))
         conn.commit()
         print(f"Deleted MVP data for {yesterday}.")

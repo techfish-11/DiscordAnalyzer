@@ -57,8 +57,8 @@ class WikipediaCog(commands.Cog):
             await interaction.followup.send(embed=embed)
         except wikipedia.exceptions.PageError:
             await interaction.followup.send(f"**'{query}'** に該当するページが見つかりませんでした。")
-        except Exception as e:
-            await interaction.followup.send(f"エラーが発生しました")
+        except Exception:
+            await interaction.followup.send("エラーが発生しました")
 
 async def setup(bot: commands.Bot):
     """Cogを非同期で追加するためのセットアップ関数"""
