@@ -17,7 +17,7 @@ class MemberWelcomeCog(commands.Cog):
 
         if guild is not None and channel is not None:
             remaining_members = TARGET_MEMBER_COUNT - len(guild.members)
-            if remaining_members <= 0:
+            if remaining_members > 0:
                 await channel.send(
                     f"ようこそ {member.mention} さん！\n現在のメンバー数: {len(guild.members)}人。\n"
                     f"あと {remaining_members} 人で {TARGET_MEMBER_COUNT}人達成です！"
