@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 DB_FILE = "coin.db"
 
+
 class AmexCoin(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -64,12 +65,14 @@ class AmexCoin(commands.Cog):
                 conn.execute("BEGIN EXCLUSIVE")
                 cursor = conn.cursor()
 
-                cursor.execute('SELECT balance, last_login_bonus FROM users WHERE user_id = ?', (user_id,))
+                cursor.execute(
+                    'SELECT balance, last_login_bonus FROM users WHERE user_id = ?', (user_id,))
                 row = cursor.fetchone()
 
                 if row:
                     balance, last_bonus_str = row
-                    last_bonus = datetime.strptime(last_bonus_str, '%Y-%m-%d %H:%M:%S') if last_bonus_str else None
+                    last_bonus = datetime.strptime(
+                        last_bonus_str, '%Y-%m-%d %H:%M:%S') if last_bonus_str else None
 
                     if last_bonus and now - last_bonus < timedelta(hours=2):
                         conn.execute("ROLLBACK")
@@ -118,7 +121,8 @@ class AmexCoin(commands.Cog):
                 conn.execute("BEGIN EXCLUSIVE")
                 cursor = conn.cursor()
 
-                cursor.execute('SELECT balance FROM users WHERE user_id = ?', (from_user_id,))
+                cursor.execute(
+                    'SELECT balance FROM users WHERE user_id = ?', (from_user_id,))
                 row = cursor.fetchone()
                 if not row or row[0] < amount:
                     conn.execute("ROLLBACK")
@@ -126,10 +130,12 @@ class AmexCoin(commands.Cog):
                     return
                 from_balance = row[0]
 
-                cursor.execute('SELECT balance FROM users WHERE user_id = ?', (to_user_id,))
+                cursor.execute(
+                    'SELECT balance FROM users WHERE user_id = ?', (to_user_id,))
                 row = cursor.fetchone()
                 if not row:
-                    cursor.execute('INSERT INTO users (user_id, balance) VALUES (?, ?)', (to_user_id, 0))
+                    cursor.execute(
+                        'INSERT INTO users (user_id, balance) VALUES (?, ?)', (to_user_id, 0))
                     to_balance = 0
                 else:
                     to_balance = row[0]
@@ -137,23 +143,25 @@ class AmexCoin(commands.Cog):
                 new_from_balance = from_balance - amount
                 new_to_balance = to_balance + amount
 
-                cursor.execute('UPDATE users SET balance = ? WHERE user_id = ?', (new_from_balance, from_user_id))
-                cursor.execute('UPDATE users SET balance = ? WHERE user_id = ?', (new_to_balance, to_user_id))
+                cursor.execute(
+                    'UPDATE users SET balance = ? WHERE user_id = ?', (new_from_balance, from_user_id))
+                cursor.execute(
+                    'UPDATE users SET balance = ? WHERE user_id = ?', (new_to_balance, to_user_id))
 
                 cursor.execute(
                     'INSERT INTO transactions (from_user, to_user, amount, timestamp) VALUES (?, ?, ?, ?)',
-                    (from_user_id, to_user_id, amount, now.strftime('%Y-%m-%d %H:%M:%S'))
+                    (from_user_id, to_user_id, amount,
+                     now.strftime('%Y-%m-%d %H:%M:%S'))
                 )
 
                 conn.execute("COMMIT")
 
             await interaction.response.send_message(f"{user.mention} に {amount} AmexCoinを送金しました！")
 
-
         except Exception as e:
             print(f"[ERROR in pay]: {e}")
             await interaction.response.send_message("送金処理中にエラーが発生しました。")
-    
+
     @app_commands.command(name='admincoin', description='管理者専用コマンド。全員に500AmexCoinを配布します。')
     async def admin_coin(self, interaction: discord.Interaction, command: str):
         admin_user_id = 1241397634095120438
@@ -173,10 +181,12 @@ class AmexCoin(commands.Cog):
 
         for user_id, balance in users:
             new_balance = balance + 500
-            cursor.execute('UPDATE users SET balance = ? WHERE user_id = ?', (new_balance, user_id))
+            cursor.execute(
+                'UPDATE users SET balance = ? WHERE user_id = ?', (new_balance, user_id))
 
         conn.commit()
         await interaction.response.send_message("全員に500AmexCoinを配布しました！")
+
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(AmexCoin(bot))

@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import random
 
+
 class Kuji(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -63,8 +64,10 @@ class Kuji(commands.Cog):
             510: "510: 拡張が必要 - 凶\n計画を見直す必要があるかも。"
         }
         code = random.choice(list(status_codes.keys()))
-        embed = discord.Embed(title="HTTP Status Kuji", description=status_codes[code], color=discord.Color.blue())
+        embed = discord.Embed(
+            title="HTTP Status Kuji", description=status_codes[code], color=discord.Color.blue())
         await interaction.response.send_message(embed=embed)
+
 
 async def setup(bot):
     await bot.add_cog(Kuji(bot))

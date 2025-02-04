@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 # cogs/daylymvp.py
 
+
 class DailyMVPCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -17,7 +18,8 @@ class DailyMVPCog(commands.Cog):
         cursor = conn.cursor()
         yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
 
-        cursor.execute('DELETE FROM message_points WHERE date = ?', (yesterday,))
+        cursor.execute(
+            'DELETE FROM message_points WHERE date = ?', (yesterday,))
         conn.commit()
         print(f"Deleted MVP data for {yesterday}.")
 
@@ -29,6 +31,7 @@ class DailyMVPCog(commands.Cog):
         if now >= next_run:
             next_run += timedelta(days=1)
         await discord.utils.sleep_until(next_run)
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(DailyMVPCog(bot))

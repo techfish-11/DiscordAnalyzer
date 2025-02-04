@@ -6,6 +6,7 @@ from database import record_member_join
 import sys
 sys.path.insert(0, '/root/EvexDevelopers-SupportBot')
 
+
 class MemberWelcomeCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -57,10 +58,12 @@ class MemberWelcomeCog(commands.Cog):
         guild = ctx.guild
         if guild:
             current_member_count = len(guild.members)
-            progress_percentage = (current_member_count / TARGET_MEMBER_COUNT) * 100
+            progress_percentage = (
+                current_member_count / TARGET_MEMBER_COUNT) * 100
             await ctx.response.send_message(f"{TARGET_MEMBER_COUNT}人達成までの現在の進捗率: {progress_percentage:.2f}%")
         else:
             await ctx.response.send_message("このコマンドはサーバー内でのみ使用できます。")
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(MemberWelcomeCog(bot))

@@ -4,6 +4,7 @@ import aiohttp
 import base64
 from io import BytesIO
 
+
 class Captcha(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -21,12 +22,14 @@ class Captcha(commands.Cog):
                     data = await response.json()
                     image_data = data['image'].split(',')[1]
                     image_bytes = base64.b64decode(image_data)
-                    image_file = discord.File(BytesIO(image_bytes), filename='captcha.png')
+                    image_file = discord.File(
+                        BytesIO(image_bytes), filename='captcha.png')
                     answer = data['answer']
                     license_notice = f"Image provided by https://captcha.evex.land\nAnswer: {answer}"
                     await ctx.response.send_message(content=license_notice, file=image_file)
                 else:
                     await ctx.response.send_message('Failed to retrieve CAPTCHA.')
+
 
 async def setup(bot):
     await bot.add_cog(Captcha(bot))

@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import random
 
+
 class ProgramKuji(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -9,7 +10,7 @@ class ProgramKuji(commands.Cog):
     @discord.app_commands.command(name='programgacha', description='ランダムなプログラミング言語を選びます。')
     async def program_kuji(self, ctx: discord.Interaction) -> None:
         languages = [
-            'Python', 'JavaScript', 'Java', 'C#', 'C++', 'Ruby', 'Go', 'Swift', 'Kotlin', 'Rust', 
+            'Python', 'JavaScript', 'Java', 'C#', 'C++', 'Ruby', 'Go', 'Swift', 'Kotlin', 'Rust',
             'Cow', 'Assembly',  # 標準的な言語
             'Whitespace',  # 空白文字のみで構成された言語
             'LOLCode',  # LOLspeak（インターネットスラング）を使用した言語
@@ -54,10 +55,12 @@ class ProgramKuji(commands.Cog):
         ]
 
         chosen_language = random.choice(languages)
-        
-        embed = discord.Embed(title="プログラミング言語ガチャ", description=f'ガチャで出てきたプログラミング言語は: {chosen_language} です！', color=discord.Color.blue())
-        
+
+        embed = discord.Embed(
+            title="プログラミング言語ガチャ", description=f'ガチャで出てきたプログラミング言語は: {chosen_language} です！', color=discord.Color.blue())
+
         await ctx.response.send_message(embed=embed)
+
 
 async def setup(bot):
     await bot.add_cog(ProgramKuji(bot))

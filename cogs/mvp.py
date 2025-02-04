@@ -13,13 +13,13 @@ class MVPCog(commands.Cog):
 
     @discord.app_commands.command(name='mvp', description='当日の上位5ユーザーを表示します。')
     async def login_bonus(self, ctx: discord.Interaction) -> None:
-        await discord.Interaction.response.defer()
+        await ctx.response.defer()
         print("MVP command called.")
         """当日の上位5ユーザーを表示。"""
         conn = get_db_connection()
         cursor = conn.cursor()
         today = datetime.now().strftime('%Y-%m-%d')
-        
+
         cursor.execute('''
             SELECT user_id, total_points,
                    text_count, link_count, media_count, reply_count
@@ -28,7 +28,7 @@ class MVPCog(commands.Cog):
             ORDER BY total_points DESC 
             LIMIT 5
         ''', (today,))
-        
+
         rankings = cursor.fetchall()
         if not rankings:
             await ctx.response.send_message("本日のアクティビティはまだありません。")
@@ -64,6 +64,7 @@ class MVPCog(commands.Cog):
 
         await ctx.response.send_message(embed=embed)
         print(f"Displayed MVP rankings for {today}.")
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(MVPCog(bot))

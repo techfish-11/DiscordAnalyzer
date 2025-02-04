@@ -4,6 +4,7 @@ from discord import app_commands
 import requests
 import re
 
+
 class PackageSearch(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -44,10 +45,11 @@ class PackageSearch(commands.Cog):
             response.raise_for_status()  # HTTPエラーの自動検出
 
             package_info = response.json()
-            latest_version = package_info.get("dist-tags", {}).get("latest", "不明")
+            latest_version = package_info.get(
+                "dist-tags", {}).get("latest", "不明")
             description = package_info.get("description", "説明なし")
             homepage = package_info.get("homepage", "情報なし")
-            
+
             return (f"**{package_name}**\n"
                     f"バージョン: {latest_version}\n"
                     f"説明: {description}\n"
@@ -77,6 +79,7 @@ class PackageSearch(commands.Cog):
             return f"pipパッケージの取得中にHTTPエラーが発生しました: {e}"
         except Exception as e:
             return f"pipパッケージの検索中にエラーが発生しました: {str(e)}"
+
 
 async def setup(bot: commands.Bot):
     """Cogを非同期で追加"""

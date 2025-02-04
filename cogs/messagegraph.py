@@ -33,7 +33,8 @@ class MessageGraphCog(commands.Cog):
         # 予測ロジック（7日EMA or 2点以上なら線形回帰）
         if len(dates) >= 7:
             ema_window = 7
-            ema = np.convolve(counts, np.ones(ema_window)/ema_window, mode='valid')
+            ema = np.convolve(counts, np.ones(ema_window) /
+                              ema_window, mode='valid')
             last_ema = ema[-1]
             predicted_count = int(last_ema)
         elif len(dates) >= 2:
@@ -53,19 +54,19 @@ class MessageGraphCog(commands.Cog):
         ax.set_facecolor('#1a1a1a')
         fig.patch.set_facecolor('#1a1a1a')
 
-        ax.plot(dates, counts, marker='o', color='#3498db', linestyle='-', 
+        ax.plot(dates, counts, marker='o', color='#3498db', linestyle='-',
                 linewidth=2, markersize=4, label='Messages')
 
         if len(dates) >= 7:
             ema_dates = dates[ema_window-1:]
-            ax.plot(ema_dates, ema, color='#f1c40f', linestyle='--', 
+            ax.plot(ema_dates, ema, color='#f1c40f', linestyle='--',
                     linewidth=2, label=f'{ema_window}-Day EMA')
-            ax.plot(dates[-1] + timedelta(days=1), predicted_count, marker='x', 
-                    color='#e74c3c', linestyle='None', markersize=8, 
+            ax.plot(dates[-1] + timedelta(days=1), predicted_count, marker='x',
+                    color='#e74c3c', linestyle='None', markersize=8,
                     label='Predicted Tomorrow')
         elif len(dates) >= 2:
             tomorrow = dates[-1] + timedelta(days=1)
-            ax.plot(tomorrow, predicted_count, marker='x', color='#e74c3c', 
+            ax.plot(tomorrow, predicted_count, marker='x', color='#e74c3c',
                     linestyle='None', markersize=8, label='Predicted Tomorrow')
 
         ax.set_facecolor('#f8f9fa')
@@ -73,7 +74,7 @@ class MessageGraphCog(commands.Cog):
 
         ax.set_xlabel('Date', fontsize=12, fontweight='bold')
         ax.set_ylabel('Message Count', fontsize=12, fontweight='bold')
-        ax.set_title("Daily Message Count with Tomorrow's Prediction", fontsize=14, 
+        ax.set_title("Daily Message Count with Tomorrow's Prediction", fontsize=14,
                      fontweight='bold', pad=20)
 
         ax.tick_params(axis='both', labelsize=10)
@@ -101,7 +102,7 @@ class MessageGraphCog(commands.Cog):
             x = np.array([d.toordinal() for d in dates])
             y = np.array(counts)
             # 相関をちょっと計算
-            r_value = np.corrcoef(x, y)[0,1]
+            r_value = np.corrcoef(x, y)[0, 1]
             prediction_text = (
                 f"📈 **予測**: 明日のメッセージ数は **{predicted_count}** 件と予想されます。\n"
                 f"回帰直線: y ≈ {round(np.polyfit(x, y, 1)[0],2)}x + {round(np.polyfit(x, y, 1)[1],2)}\n"
@@ -113,6 +114,7 @@ class MessageGraphCog(commands.Cog):
         await ctx.send("📊 **日別メッセージ数のグラフ**\n" + prediction_text, file=file)
         plt.close()
         buf.close()
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(MessageGraphCog(bot))

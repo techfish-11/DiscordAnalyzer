@@ -1,4 +1,6 @@
 # cogs/growth.py
+from config import TARGET_MEMBER_COUNT
+from database import calculate_growth_rate, get_db_connection
 import discord
 from discord.ext import commands
 from datetime import datetime, timedelta
@@ -9,8 +11,6 @@ import io
 import sys
 sys.path.insert(0, '/root/EvexDevelopers-SupportBot')
 
-from database import calculate_growth_rate, get_db_connection
-from config import TARGET_MEMBER_COUNT
 
 class GrowthCog(commands.Cog):
     def __init__(self, bot):
@@ -25,13 +25,14 @@ class GrowthCog(commands.Cog):
             return
 
         total_members = result[1]
-        
+
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute('SELECT join_date FROM members ORDER BY join_date')
         join_dates = cursor.fetchall()
 
-        dates = [datetime.strptime(row[0], '%Y-%m-%d %H:%M:%S') for row in join_dates]
+        dates = [datetime.strptime(row[0], '%Y-%m-%d %H:%M:%S')
+                 for row in join_dates]
         counts = list(range(1, len(dates) + 1))
         dates_numeric = np.array([d.timestamp() for d in dates])
         counts_array = np.array(counts)
@@ -43,13 +44,15 @@ class GrowthCog(commands.Cog):
         poly_r2 = r2_score(counts_array, poly_pred)
 
         # Predict over next 30 days
-        future_days = np.linspace(dates_numeric[-1], dates_numeric[-1] + 30*24*3600, 100)
+        future_days = np.linspace(
+            dates_numeric[-1], dates_numeric[-1] + 30*24*3600, 100)
         future_growth = poly(future_days)
         confidence_level = poly_r2
 
         target_idx = np.where(future_growth >= TARGET_MEMBER_COUNT)[0]
         if len(target_idx) > 0:
-            future_date_estimate = datetime.fromtimestamp(future_days[target_idx[0]])
+            future_date_estimate = datetime.fromtimestamp(
+                future_days[target_idx[0]])
         else:
             future_date_estimate = None
 
@@ -59,7 +62,8 @@ class GrowthCog(commands.Cog):
         ax.set_facecolor('#1a1a1a')
         fig.patch.set_facecolor('#1a1a1a')
 
-        ax.plot(dates, counts, 'o', color='#2ecc71', markersize=4, label='Actual Members')
+        ax.plot(dates, counts, 'o', color='#2ecc71',
+                markersize=4, label='Actual Members')
         future_dates = [datetime.fromtimestamp(ts) for ts in future_days]
         ax.plot(future_dates, future_growth, '--', color='#9b59b6', linewidth=2,
                 label=f'Prediction (R² = {confidence_level:.3f})')
@@ -68,8 +72,10 @@ class GrowthCog(commands.Cog):
         ax.grid(True, linestyle='--', alpha=0.7, color='#dcdde1')
         ax.set_xlabel('Date', fontsize=12, fontweight='bold')
         ax.set_ylabel('Member Count', fontsize=12, fontweight='bold')
-        ax.set_title('Server Growth Projection', fontsize=14, fontweight='bold', pad=20)
-        ax.axhline(y=TARGET_MEMBER_COUNT, color='#e74c3c', linestyle='--', label=f'Target: {TARGET_MEMBER_COUNT}')
+        ax.set_title('Server Growth Projection',
+                     fontsize=14, fontweight='bold', pad=20)
+        ax.axhline(y=TARGET_MEMBER_COUNT, color='#e74c3c',
+                   linestyle='--', label=f'Target: {TARGET_MEMBER_COUNT}')
         plt.xticks(rotation=30, ha='right')
         ax.legend(loc='upper left', frameon=True)
         plt.tight_layout()
@@ -112,6 +118,7 @@ class GrowthCog(commands.Cog):
         await ctx.response.send_message(growth_message, file=file)
         plt.close()
         buf.close()
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(GrowthCog(bot))
