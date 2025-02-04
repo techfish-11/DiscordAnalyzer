@@ -17,10 +17,13 @@ class MemberWelcomeCog(commands.Cog):
 
         if guild is not None and channel is not None:
             remaining_members = TARGET_MEMBER_COUNT - len(guild.members)
-            await channel.send(
-                f"ようこそ {member.mention} さん！現在のメンバー数: {len(guild.members)}人。\n"
-                f"あと {remaining_members} 人で {TARGET_MEMBER_COUNT}人達成です！"
-            )
+            if remaining_members <= 0:
+                await channel.send(
+                    f"ようこそ {member.mention} さん！\n現在のメンバー数: {len(guild.members)}人。\n"
+                    f"あと {remaining_members} 人で {TARGET_MEMBER_COUNT}人達成です！"
+                )
+            else:
+                await channel.send(f"ようこそ {member.mention} さん！")
 
         join_date = member.joined_at.strftime('%Y-%m-%d %H:%M:%S')
         record_member_join(member.id, join_date)
