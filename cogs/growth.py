@@ -3,7 +3,6 @@ import discord
 from discord.ext import commands
 from datetime import datetime, timedelta
 import numpy as np
-from scipy import stats
 from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
 import io
@@ -12,7 +11,6 @@ sys.path.insert(0, '/root/EvexDevelopers-SupportBot')
 
 from database import calculate_growth_rate, get_db_connection
 from config import TARGET_MEMBER_COUNT
-from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 class GrowthCog(commands.Cog):
     def __init__(self, bot):
@@ -80,7 +78,7 @@ class GrowthCog(commands.Cog):
         plt.savefig(buf, format='png', dpi=300, bbox_inches='tight')
         buf.seek(0)
         file = discord.File(buf, filename='growth.png')
-        
+
         # Growth stats
         today = datetime.now()
         thirty_days_ago = today - timedelta(days=30)
